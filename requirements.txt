@@ -3,3 +3,4 @@ pyproj==3.5.0
 python-telegram-bot==20.3
 Requests==2.31.0
 selenium==4.9.1
+urllib3==1.26.6

@@ -4,12 +4,16 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import WebDriverException
 
-import time, tempfile
+import time, string, random, os
 
 from PIL import Image
 
-_, path_small_png = tempfile.mkstemp()
-_, path_large_png = tempfile.mkstemp()
+temp_dir = r'temp' 
+if not os.path.exists(temp_dir):
+    os.makedirs(temp_dir)
+filebase = ''.join(random.choices(string.ascii_lowercase, k=10))
+path_small_png = f'{temp_dir}/{filebase}_small.png'
+path_large_png = f'{temp_dir}/{filebase}_large.png'
 
 def wheel_element(element, deltaY = 120, offsetX = 0, offsetY = 0):
   error = element._parent.execute_script("""
@@ -38,6 +42,10 @@ def crop(image):
     im_crop = im.crop((100, 270, 980, 1650))
     im_crop.save(image)
 
+def delete_images(path_1, path_2):
+   os.remove(path_1)
+   os.remove(path_2)
+
 def take_screenshoot(ref_catastral):
     # Set up Firefox options
     options = FirefoxOptions()
@@ -53,6 +61,7 @@ def take_screenshoot(ref_catastral):
 
     # Navigate to the website
     driver.get(url)
+    time.sleep(1)
 
     # close popup
     driver.find_element(By.CSS_SELECTOR, 'ion-icon.clicable.close-page.icon.icon-md.ion-md-close[role="img"][aria-label="close"]').click()

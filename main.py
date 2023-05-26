@@ -1,15 +1,16 @@
 import screenshot
 import logging as log
-import requests, json, locale, math
+import os, requests, json, locale, math, sys
 import xml.etree.ElementTree as ET
 import pyproj
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Updater, CommandHandler, MessageHandler, filters, CallbackQueryHandler, ContextTypes
+from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, ContextTypes, filters
 
 locale.setlocale(locale.LC_ALL, 'es_ES')
+log.basicConfig(stream=sys.stdout, level=log.INFO)
 
 # Telegram bot token
-TOKEN = '6250844264:AAGxwGHnX6Nlo-i1GiX5oYKFDvyng-spt6I'
+TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN_PARCEL_FINDER')
 
 KEYBOARD_OPTIONS = dict(
     info='info',
@@ -26,45 +27,50 @@ options_keyboard = InlineKeyboardMarkup([
             ])
 remove_keyboard = InlineKeyboardMarkup([])
 
-def start(update, context):
-    update.message.reply_text('¿Cuál es el polígono?')
+async def start(update, context):
+    await update.message.reply_text('¿Cuál es el polígono?')
 
-def InlineKeyboardHandler(update: Update, context: ContextTypes._context):
+async def InlineKeyboardHandler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     poligono = context.user_data.get('poligono')
     parcela = context.user_data.get('parcela')
 
     option = update.callback_query.data
     if option == KEYBOARD_OPTIONS['info']:
-        update.callback_query.edit_message_text(text=get_info(poligono, parcela))
-        update.callback_query.bot.send_message(text='¿Qué más quieres saber?', chat_id=update.effective_chat.id, reply_markup=options_keyboard)
+        await update.callback_query.edit_message_text(text=get_info(poligono, parcela))
+        await update.callback_query.message.reply_text(text='¿Qué más quieres saber?', reply_markup=options_keyboard)
     elif option == KEYBOARD_OPTIONS['navigate']:
-        update.callback_query.edit_message_text(text='Envíame la ubicación desde la que ir a la parcela')
-        update.callback_query.bot.send_message(text='¿Qué más quieres saber?', chat_id=update.effective_chat.id, reply_markup=options_keyboard)
+        await update.callback_query.edit_message_text(text='Envíame la ubicación desde la que ir a la parcela')
+        await update.callback_query.message.reply_text(text='¿Qué más quieres saber?', reply_markup=options_keyboard)
     elif option == KEYBOARD_OPTIONS['photo']:
-        update.callback_query.edit_message_text(text='En unos segundos recibirás fotos de tu parcela')
-        take_screenshot(update, poligono, parcela)
-        update.callback_query.bot.send_message(text='¿Qué más quieres saber?', chat_id=update.effective_chat.id, reply_markup=options_keyboard)
+        await update.callback_query.edit_message_text(text='En unos segundos recibirás fotos de tu parcela')
+        path_small_image, path_large_image = take_screenshot(update, poligono, parcela)
+        await update.callback_query.message.reply_photo(photo=open(path_small_image, 'rb'))
+        await update.callback_query.message.reply_photo(photo=open(path_large_image, 'rb'))
+        screenshot.delete_images(path_small_image, path_large_image)
+        await update.callback_query.message.reply_text(text='¿Qué más quieres saber?', reply_markup=options_keyboard)
     elif option == KEYBOARD_OPTIONS['new_search']:
         context.user_data['poligono'] = None
         context.user_data['parcela'] = None
-        update.callback_query.bot.send_message(text='¿Cuál es el polígono?', chat_id=update.effective_chat.id, reply_markup=remove_keyboard)
+        await update.callback_query.message.reply_text(text='¿Cuál es el polígono?', reply_markup=remove_keyboard)
 
-def calculate_distance(update, context):
+async def calculate_distance(update, context):
     pol_empty = True if not context.user_data.get('poligono') else False
     par_empty = True if not context.user_data.get('parcela') else False
 
     if pol_empty or par_empty:
-        update.message.reply_text('No has introducido el polígono y parcela, haz click en \'Introducir información\'')
+        await update.message.reply_text('No has introducido el polígono y parcela, haz click en \'Introducir información\'')
         
     # get user coordinates
     user_location = update.message.location
     origen_coordinates = (user_location.latitude, user_location.longitude)
+    log.debug(f'Origin coordinates: {origen_coordinates[0]}, {origen_coordinates[1]}')
 
     # get parcel coordinates
     poligono = context.user_data.get('poligono')
     parcela = context.user_data.get('parcela')
     jcyl_info = get_catastro_jcyl(poligono, parcela)
     destination_coordinates = get_parcela_coordinates(jcyl_info)
+    log.debug(f'Destination coordinates: {destination_coordinates[0]}, {destination_coordinates[1]}')
     
     # get distance
     distance = get_distance(origen_coordinates, destination_coordinates)
@@ -75,23 +81,23 @@ def calculate_distance(update, context):
     direction_text = print_direction(degrees)
 
     # return information
-    update.message.reply_text(f'La parcela está a {distance_text} al {direction_text}')
+    await update.message.reply_text(f'La parcela está a {distance_text} al {direction_text}')
 
-def any_input(update, context):
+async def any_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     pol_empty = True if not context.user_data.get('poligono') else False
     par_empty = True if not context.user_data.get('parcela') else False
 
     if pol_empty:
         context.user_data['poligono'] = update.message.text
-        update.message.reply_text('¿Cuál es la parcela?')
+        await update.message.reply_text('¿Cuál es la parcela?')
     elif par_empty:
         context.user_data['parcela'] = update.message.text
         poligono = context.user_data.get('poligono')
         parcela = context.user_data.get('parcela')
-        update.message.reply_text(f'Has selecionado el polígono {poligono} y la parcela {parcela}')
-        update.message.reply_text('¿Qué quieres saber?', reply_markup=options_keyboard)
+        await update.message.reply_text(f'Has selecionado el polígono {poligono} y la parcela {parcela}')
+        await update.message.reply_text('¿Qué quieres saber?', reply_markup=options_keyboard)
     else:
-        update.message.reply_text(f'Ya has selecionado el polígono {poligono} y la parcela {parcela}')
+        await update.message.reply_text(f'Ya has selecionado el polígono {poligono} y la parcela {parcela}')
 
 def get_catastro_jcyl(poligono, parcela):
     url = f'https://idecyl.jcyl.es/vcig/proxy.php?url=https%3A%2F%2Fovc.catastro.meh.es%2Fovcservweb%2FOVCSWLocalizacionRC%2FOVCCoordenadas.asmx%2FConsulta_CPMRC%3FSRS%3DEPSG%3A4326%26Provincia%3D%26Municipio%3D%26RC%3D49135A0{poligono}{parcela.zfill(5)}'
@@ -147,7 +153,7 @@ def get_direction(org, dest):
         return degrees
 
 def print_direction(degrees):
-    print(degrees)
+    log.debug(f'Direction degrees: {degrees}')
     compass = ['este', 'noreste', 'norte', 'noroeste', 'oeste', 'suroeste', 'este', 'sureste', 'este']
     return compass[round(degrees/45)]
 
@@ -169,20 +175,17 @@ def take_screenshot(update, poligono, parcela):
     sigpac_info = get_catastro_sigpac(poligono, parcela)
     ref_catastral = get_ref_catastral(sigpac_info)
     path_small_image, path_large_image = screenshot.take_screenshoot(ref_catastral)
-    update.callback_query.bot.send_photo(chat_id=update.effective_chat.id, photo=open(path_small_image, 'rb'))
-    update.callback_query.bot.send_photo(chat_id=update.effective_chat.id, photo=open(path_large_image, 'rb'))
+    return path_small_image, path_large_image
 
 def main():
-    updater = Updater(TOKEN, use_context=True)
-    dp = updater.dispatcher
+    bot = Application.builder().token(TOKEN).build()
 
-    dp.add_handler(CommandHandler("start", start))
-    dp.add_handler(MessageHandler(filters.Filters.location, calculate_distance))
-    dp.add_handler(CallbackQueryHandler(InlineKeyboardHandler))
-    dp.add_handler(MessageHandler(filters.Filters.text, any_input))
+    bot.add_handler(CommandHandler("start", start))
+    bot.add_handler(MessageHandler(filters.LOCATION, calculate_distance))
+    bot.add_handler(CallbackQueryHandler(InlineKeyboardHandler))
+    bot.add_handler(MessageHandler(filters.TEXT, any_input))
 
-    updater.start_polling()
-    updater.idle()
+    bot.run_polling()
 
 if __name__ == '__main__':
     main()
