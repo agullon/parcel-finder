@@ -14,9 +14,11 @@ build:
 push:
 	$(CONTAINER_ENGINE) push $(DOCKER_REPO)/$(IMAGE_NAME):$(IMAGE_VERSION)
 
-deploy:
+deploy-secret:
 	kubectl create secret generic regcred --from-file=.dockerconfigjson=/home/agullon/.docker/config.json --type=kubernetes.io/dockerconfigjson -n prod
-	kubectl create secret generic telegram-bot-token --from-file=ssh-privatekey=/home/agullon/.docker/telegram-bot-token -n prod
+deploy:
+	kubectl delete secret telegram-bot-token -n prod
+	kubectl create secret generic telegram-bot-token --from-file=/home/agullon/parcel-finder/telegram-bot-token -n prod
 	kubectl apply -f deployment.yaml -n prod
 
 rollout:
