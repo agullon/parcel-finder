@@ -1,8 +1,8 @@
 import screenshot
 import logging as log
-import os, requests, json, locale, math, sys
+import requests, json, locale, math, sys
 import xml.etree.ElementTree as ET
-import pyproj
+from geopy.distance import geodesic as geo_distance
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, ContextTypes, filters
 
@@ -10,7 +10,7 @@ locale.setlocale(locale.LC_ALL, 'es_ES')
 log.basicConfig(stream=sys.stdout, level=log.INFO)
 
 # Telegram bot token
-TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN_PARCEL_FINDER')
+TOKEN = open('telegram-bot-token', 'r').read().strip()
 
 KEYBOARD_OPTIONS = dict(
     info='info',
@@ -73,7 +73,7 @@ async def calculate_distance(update, context):
     log.debug(f'Destination coordinates: {destination_coordinates[0]}, {destination_coordinates[1]}')
     
     # get distance
-    distance = get_distance(origen_coordinates, destination_coordinates)
+    distance = geo_distance(origen_coordinates, destination_coordinates).meters
     distance_text = print_distance(distance)
 
     # get direction
@@ -128,11 +128,6 @@ def get_detailed_info(sigpac_info):
 
 def get_ref_catastral(sigpac_info):
     return sigpac_info['parcelaInfo']['referencia_cat']
-
-def get_distance(org, dest):
-    geodesic = pyproj.Geod(ellps='WGS84')
-    _,_,distance = geodesic.inv(org[1], org[0], dest[1], dest[0])
-    return distance
 
 def print_distance(distance):
     if distance > 1000:

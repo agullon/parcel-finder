@@ -1,0 +1,29 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: parcel-finder-deployment
+  labels:
+    project: telegram
+    app: parcel-finder
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: parcel-finder
+  template:
+    metadata:
+      labels:
+        app: parcel-finder
+    spec:
+      containers:
+      - name: parcel-finder
+        image: agullon/parcel-finder:latest
+        command: ["python"]
+        args: ["main.py"]
+        volumeMounts:
+        - name: telegram-bot-token
+          readOnly: true
+          mountPath: "telegram-bot-token"
+      imagePullSecrets:
+      - name: regcred
