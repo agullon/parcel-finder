@@ -10,7 +10,7 @@ locale.setlocale(locale.LC_ALL, 'es_ES')
 log.basicConfig(stream=sys.stdout, level=log.INFO)
 
 # Telegram bot token
-TOKEN = open('/etc/telegram-bot-token/telegram-bot-token', 'r').read().strip()
+TOKEN = open('/etc/telegram-bot-token', 'r').read().strip()
 log.info(f'{TOKEN}')
 
 KEYBOARD_OPTIONS = dict(
@@ -190,7 +190,7 @@ def get_info(poligono, parcela):
 
     jcyl_info = get_catastro_jcyl(poligono, parcela)
     sigpac_info = get_catastro_sigpac(poligono, parcela)
-    
+
     paraje = get_paraje(jcyl_info).split(f'{parcela} ')[1].split('.')[0].title()
     area, slope = get_detailed_info(sigpac_info)
     slope = slope/10
