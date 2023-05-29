@@ -1,5 +1,4 @@
 from selenium import webdriver
-from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import WebDriverException
@@ -48,13 +47,13 @@ def delete_images(path_1, path_2):
 
 def take_screenshoot(ref_catastral):
     # Set up Firefox options
-    options = FirefoxOptions()
+    options = webdriver.FirefoxOptions()
     options.add_argument("--headless")
-    options.add_argument("-width=1080");
-    options.add_argument("-height=1920");
+    options.add_argument("-width=1080")
+    options.add_argument("-height=1920")
 
     # Create a new instance of Firefox driver
-    driver = webdriver.Firefox(options=options)
+    driver = webdriver.Remote("http://127.0.0.1:4444/wd/hub", options=options)
 
     # Website URL to navigate
     url = 'https://idecyl.jcyl.es/vcig/?service=https://idecyl.jcyl.es/geoserver/lc/wms'
@@ -112,7 +111,7 @@ def take_screenshoot(ref_catastral):
     elm = driver.find_element(By.XPATH, '//*[@id="ol-main-map"]/div/canvas')
     time.sleep(0.2)
     wheel_element(elm, -100)
-    time.sleep(0.2)
+    time.sleep(1)
 
     # first screenshot
     driver.save_screenshot(path_small_png)
