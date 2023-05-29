@@ -21,8 +21,6 @@ spec:
         image: agullon/parcel-finder:latest
         command: ["python"]
         args: ["main.py"]
-        ports:
-        - containerPort: 5050
         volumeMounts:
         - name: telegram-bot-token
           readOnly: true
