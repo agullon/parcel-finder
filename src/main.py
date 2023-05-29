@@ -39,7 +39,7 @@ async def InlineKeyboardHandler(update: Update, context: ContextTypes.DEFAULT_TY
     if option == KEYBOARD_OPTIONS['info']:
         sigpac_info = get_catastro_sigpac(poligono, parcela)
         if not sigpac_info:
-            await update.callback_query.edit_message_text(text='El polígono y la parcela no existen, introduce los datos de nuevo')
+            await update.callback_query.edit_message_text(text='Ha habido un error, comprueba que la parcel y polígono son correctos. Inténtalo de nuevo más tarde.')
             context.user_data['poligono'] = None
             context.user_data['parcela'] = None
             await update.callback_query.message.reply_text(text='¿Cuál es el polígono?', reply_markup=remove_keyboard)
@@ -49,7 +49,7 @@ async def InlineKeyboardHandler(update: Update, context: ContextTypes.DEFAULT_TY
     elif option == KEYBOARD_OPTIONS['navigate']:
         sigpac_info = get_catastro_sigpac(poligono, parcela)
         if not sigpac_info:
-            await update.callback_query.edit_message_text(text='El polígono y la parcela no existen, introduce los datos de nuevo')
+            await update.callback_query.edit_message_text(text='Ha habido un error, comprueba que la parcel y polígono son correctos. Inténtalo de nuevo más tarde.')
             context.user_data['poligono'] = None
             context.user_data['parcela'] = None
             await update.callback_query.message.reply_text(text='¿Cuál es el polígono?', reply_markup=remove_keyboard)
@@ -59,7 +59,7 @@ async def InlineKeyboardHandler(update: Update, context: ContextTypes.DEFAULT_TY
     elif option == KEYBOARD_OPTIONS['photo']:
         sigpac_info = get_catastro_sigpac(poligono, parcela)
         if not sigpac_info:
-            await update.callback_query.edit_message_text(text='El polígono y la parcela no existen, introduce los datos de nuevo')
+            await update.callback_query.edit_message_text(text='Ha habido un error, comprueba que la parcel y polígono son correctos. Inténtalo de nuevo más tarde.')
             context.user_data['poligono'] = None
             context.user_data['parcela'] = None
             await update.callback_query.message.reply_text(text='¿Cuál es el polígono?', reply_markup=remove_keyboard)
