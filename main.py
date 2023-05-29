@@ -10,7 +10,8 @@ locale.setlocale(locale.LC_ALL, 'es_ES')
 log.basicConfig(stream=sys.stdout, level=log.INFO)
 
 # Telegram bot token
-TOKEN = open('telegram-bot-token', 'r').read().strip()
+TOKEN = open('/etc/telegram-bot-token/telegram-bot-token', 'r').read().strip()
+log.info(f'{TOKEN}')
 
 KEYBOARD_OPTIONS = dict(
     info='info',

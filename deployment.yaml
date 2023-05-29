@@ -24,6 +24,11 @@ spec:
         volumeMounts:
         - name: telegram-bot-token
           readOnly: true
-          mountPath: "telegram-bot-token"
+          mountPath: "/etc/telegram-bot-token"
       imagePullSecrets:
       - name: regcred
+      volumes:
+        - name: telegram-bot-token
+          secret:
+            secretName: telegram-bot-token
+            optional: true
