@@ -37,14 +37,36 @@ async def InlineKeyboardHandler(update: Update, context: ContextTypes.DEFAULT_TY
 
     option = update.callback_query.data
     if option == KEYBOARD_OPTIONS['info']:
+        sigpac_info = get_catastro_sigpac(poligono, parcela)
+        if not sigpac_info:
+            await update.callback_query.edit_message_text(text='El polígono y la parcela no existen, introduce los datos de nuevo')
+            context.user_data['poligono'] = None
+            context.user_data['parcela'] = None
+            await update.callback_query.message.reply_text(text='¿Cuál es el polígono?', reply_markup=remove_keyboard)
+            return
         await update.callback_query.edit_message_text(text=get_info(poligono, parcela))
         await update.callback_query.message.reply_text(text='¿Qué más quieres saber?', reply_markup=options_keyboard)
     elif option == KEYBOARD_OPTIONS['navigate']:
+        sigpac_info = get_catastro_sigpac(poligono, parcela)
+        if not sigpac_info:
+            await update.callback_query.edit_message_text(text='El polígono y la parcela no existen, introduce los datos de nuevo')
+            context.user_data['poligono'] = None
+            context.user_data['parcela'] = None
+            await update.callback_query.message.reply_text(text='¿Cuál es el polígono?', reply_markup=remove_keyboard)
+            return
         await update.callback_query.edit_message_text(text='Envíame la ubicación desde la que ir a la parcela')
         await update.callback_query.message.reply_text(text='¿Qué más quieres saber?', reply_markup=options_keyboard)
     elif option == KEYBOARD_OPTIONS['photo']:
+        sigpac_info = get_catastro_sigpac(poligono, parcela)
+        if not sigpac_info:
+            await update.callback_query.edit_message_text(text='El polígono y la parcela no existen, introduce los datos de nuevo')
+            context.user_data['poligono'] = None
+            context.user_data['parcela'] = None
+            await update.callback_query.message.reply_text(text='¿Cuál es el polígono?', reply_markup=remove_keyboard)
+            return
         await update.callback_query.edit_message_text(text='En unos segundos recibirás fotos de tu parcela')
-        path_small_image, path_large_image = take_screenshot(update, poligono, parcela)
+        ref_catastral = get_ref_catastral(sigpac_info)
+        path_small_image, path_large_image = take_screenshot(ref_catastral)
         await update.callback_query.message.reply_photo(photo=open(path_small_image, 'rb'))
         await update.callback_query.message.reply_photo(photo=open(path_large_image, 'rb'))
         screenshot.delete_images(path_small_image, path_large_image)
@@ -112,7 +134,13 @@ def get_catastro_sigpac(poligono, parcela):
     url = f'https://sigpac.mapama.gob.es/fega/serviciosvisorsigpac/layerinfo?layer=parcela&id=49,135,0,0,{poligono},{parcela}'
     log.debug(f'sigpac requested url: {url}')
     response = requests.get(url)
-    return json.loads(response.content)
+    res_json = json.loads(response.content)
+    log.info(f'sigpac info:\n {res_json}')
+
+    if res_json['query'] == []:
+        log.info(f'Parcel does not exist')
+        return None
+    return res_json
 
 def get_parcela_coordinates(catastro_info):
     namespace = {'ns': 'http://www.catastro.meh.es/'}
@@ -162,16 +190,14 @@ def get_info(poligono, parcela):
 
     jcyl_info = get_catastro_jcyl(poligono, parcela)
     sigpac_info = get_catastro_sigpac(poligono, parcela)
-
+    
     paraje = get_paraje(jcyl_info).split(f'{parcela} ')[1].split('.')[0].title()
     area, slope = get_detailed_info(sigpac_info)
     slope = slope/10
 
     return f'La parcela en el {paraje} tiene un área de {area:.0f}m² y un {slope:.0f}% de pendiente'
 
-def take_screenshot(update, poligono, parcela):
-    sigpac_info = get_catastro_sigpac(poligono, parcela)
-    ref_catastral = get_ref_catastral(sigpac_info)
+def take_screenshot(ref_catastral):
     path_small_image, path_large_image = screenshot.take_screenshoot(ref_catastral)
     return path_small_image, path_large_image
 
