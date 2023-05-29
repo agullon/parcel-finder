@@ -4,23 +4,25 @@ kind: Deployment
 metadata:
   name: parcel-finder-deployment
   labels:
-    project: telegram
-    app: parcel-finder
+    platform: telegram
+    name: parcel-finder
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: parcel-finder
+      name: parcel-finder
   template:
     metadata:
       labels:
-        app: parcel-finder
+        name: parcel-finder
     spec:
       containers:
       - name: parcel-finder
         image: agullon/parcel-finder:latest
         command: ["python"]
         args: ["main.py"]
+        ports:
+        - containerPort: 5050
         volumeMounts:
         - name: telegram-bot-token
           readOnly: true
@@ -28,7 +30,7 @@ spec:
       imagePullSecrets:
       - name: regcred
       volumes:
-        - name: telegram-bot-token
-          secret:
-            secretName: telegram-bot-token
-            optional: true
+      - name: telegram-bot-token
+        secret:
+          secretName: telegram-bot-token
+          optional: true
