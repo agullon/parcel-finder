@@ -6,7 +6,7 @@ IMAGE_NAME?=parcel-finder
 IMAGE_VERSION?=latest
 
 run/main:
-	$(CONTAINER_ENGINE) run $(DOCKER_REPO)/$(IMAGE_NAME):$(IMAGE_VERSION) python main.py
+	$(CONTAINER_ENGINE) run -p 5050:5050 $(DOCKER_REPO)/$(IMAGE_NAME):$(IMAGE_VERSION) python main.py
 
 build:
 	$(CONTAINER_ENGINE) build -t $(DOCKER_REPO)/$(IMAGE_NAME):$(IMAGE_VERSION) src
