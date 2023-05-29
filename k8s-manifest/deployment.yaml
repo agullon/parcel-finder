@@ -29,7 +29,7 @@ spec:
         image: selenium/standalone-firefox
         env:
         - name: VNC_NO_PASSWORD
-          value: 1
+          value: "1"
         ports:
         - containerPort: 4444
       imagePullSecrets:
