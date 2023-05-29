@@ -10,7 +10,7 @@ locale.setlocale(locale.LC_ALL, 'es_ES')
 log.basicConfig(stream=sys.stdout, level=log.INFO)
 
 # Telegram bot token
-TOKEN = open('/etc/telegram-bot-token', 'r').read().strip()
+TOKEN = open('/etc/telegram-bot-token/telegram-bot-token', 'r').read().strip()
 log.info(f'{TOKEN}')
 
 KEYBOARD_OPTIONS = dict(
@@ -134,11 +134,14 @@ def get_catastro_sigpac(poligono, parcela):
     url = f'https://sigpac.mapama.gob.es/fega/serviciosvisorsigpac/layerinfo?layer=parcela&id=49,135,0,0,{poligono},{parcela}'
     log.debug(f'sigpac requested url: {url}')
     response = requests.get(url)
+    log.info(f'sigpac info:\n {response.content}')
+    if response.status_code > 399:
+        log.info(f'Server returned {response.status_code} HTTP code')
+        return None
     res_json = json.loads(response.content)
-    log.info(f'sigpac info:\n {res_json}')
 
     if res_json['query'] == []:
-        log.info(f'Parcel does not exist')
+        log.info('Parcel does not exist')
         return None
     return res_json
 

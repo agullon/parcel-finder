@@ -18,19 +18,19 @@ k8s/create-secret:
 	kubectl create secret generic regcred --from-file=.dockerconfigjson=/home/agullon/.docker/config.json --type=kubernetes.io/dockerconfigjson -n prod
 
 deploy:
-	kubectl delete deploy parcel-finder-deployment -n prod
-	kubectl delete secret telegram-bot-token -n prod
 	kubectl create secret generic telegram-bot-token --from-file=/home/agullon/parcel-finder/telegram-bot-token -n prod
 	kubectl apply -f k8s-manifest/deployment.yaml -n prod
-	#kubectl apply -f k8s-manifest/service.yaml -n prod
+
+redeploy: remove deploy
 
 rollout:
 	kubectl rollout restart deployment -l name=parcel-finder -n prod
 
 logs:
-	kubectl logs -n prod -f -l name=parcel-finder
-
-delete:
+	kubectl logs -f -l name=parcel-finder -n prod
+describe:
+	kubectl describe pod -l name=parcel-finder -n prod
+remove:
 	kubectl delete deploy parcel-finder-deployment -n prod
 	kubectl delete pod -l name=parcel-finder -n prod
 	kubectl delete secret telegram-bot-token -n prod
