@@ -30,7 +30,7 @@ remove_keyboard = InlineKeyboardMarkup([])
 async def start(update, context):
     await update.message.reply_text('¿Cuál es el polígono?')
 
-async def InlineKeyboardHandler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+async def InlineKeyboardHandler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     poligono = context.user_data.get('poligono')
     parcela = context.user_data.get('parcela')
 
@@ -97,6 +97,8 @@ async def any_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_text(f'Has selecionado el polígono {poligono} y la parcela {parcela}')
         await update.message.reply_text('¿Qué quieres saber?', reply_markup=options_keyboard)
     else:
+        poligono = context.user_data.get('poligono')
+        parcela = context.user_data.get('parcela')
         await update.message.reply_text(f'Ya has selecionado el polígono {poligono} y la parcela {parcela}')
 
 def get_catastro_jcyl(poligono, parcela):
