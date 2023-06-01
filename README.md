@@ -11,7 +11,6 @@ This is a Telegram bot with a few actions to get info and navigate to a parcel i
 1. Export Telegram bot token: `echo 12345 > /etc/telegram-bot-token/telegram-bot-token`
 1. Run bot: `python3 src/main.py`
 
-
 ## Dependecies
 The data and images form the parcels are from:
 - Visor IDECyL: https://idecyl.jcyl.es/vcig
