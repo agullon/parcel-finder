@@ -1,10 +1,9 @@
 import screenshot
 
 import logging as log
-import requests, json, locale, math, sys
+import requests, json, locale, math, sys, utm
 import xml.etree.ElementTree as ET
 from geopy.distance import geodesic as geo_distance
-import utm
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, ContextTypes, filters
 
