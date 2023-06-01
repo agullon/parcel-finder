@@ -5,11 +5,6 @@ DOCKER_REPO?=agullon
 IMAGE_NAME?=parcel-finder
 IMAGE_VERSION?=latest
 
-install:
-	python3 -m venv env
-	source env/bin/activate
-	pip install -r src/requirements.txt
-
 run:
 	python3 src/main.py
 
