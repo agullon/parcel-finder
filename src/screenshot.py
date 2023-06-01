@@ -107,6 +107,8 @@ def take_screenshoot(ref_catastral):
     time.sleep(0.2)
     wheel_element(elm, -100)
     time.sleep(0.2)
+    wheel_element(elm, -100)
+    time.sleep(0.2)
 
     # first screenshot
     driver.save_screenshot(path_small_png)
