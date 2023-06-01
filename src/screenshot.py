@@ -46,7 +46,7 @@ def delete_images(path_1, path_2):
     os.remove(path_2)
 
 def take_screenshoot(ref_catastral):
-    display = Display(visible=0, size=(540, 960))
+    display = Display(visible=0, size=(1080, 1920))
     display.start()
     driver = webdriver.Chrome('/usr/lib/chromium-browser/chromedriver')
 
