@@ -26,10 +26,13 @@ options_keyboard = InlineKeyboardMarkup([
                 [InlineKeyboardButton('Una foto de la parcela', callback_data=KEYBOARD_OPTIONS['photo'])],
                 [InlineKeyboardButton('Nueva búsqueda', callback_data=KEYBOARD_OPTIONS['new_search'])],
             ])
+search_keyboard = InlineKeyboardMarkup([
+                [InlineKeyboardButton('Nueva búsqueda', callback_data=KEYBOARD_OPTIONS['new_search'])],
+            ])
 remove_keyboard = InlineKeyboardMarkup([])
 
 async def start(update, context):
-    await update.message.reply_text(text='Escribe el número de la parcela o envía tu ubicación para saber en qué parcela estás', reply_markup=remove_keyboard)
+    await update.message.reply_text(text='Escribe el número de la parcela o envía tu ubicación para saber en qué parcela estás', reply_markup=search_keyboard)
 
 async def InlineKeyboardHandler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     poligono = context.user_data.get('poligono')
@@ -42,7 +45,7 @@ async def InlineKeyboardHandler(update: Update, context: ContextTypes.DEFAULT_TY
             await update.callback_query.edit_message_text(text='Ha habido un error, comprueba que la parcel y polígono son correctos. Inténtalo de nuevo más tarde.')
             context.user_data['poligono'] = None
             context.user_data['parcela'] = None
-            await update.callback_query.message.reply_text(text='Escribe el número de la parcela o envía tu ubicación para saber en qué parcela estás', reply_markup=remove_keyboard)
+            await update.callback_query.message.reply_text(text='Escribe el número de la parcela o envía tu ubicación para saber en qué parcela estás', reply_markup=search_keyboard)
             return
         await update.callback_query.edit_message_text(text=f'{await calculate_distance(update, context, (41.9986276,-6.3471484))} de la iglesia de Fresno')
         await update.callback_query.message.reply_text(text='Envíame una ubicación para obtener indicaciones sobre cómo ir desde cualquier sitio')
@@ -53,7 +56,7 @@ async def InlineKeyboardHandler(update: Update, context: ContextTypes.DEFAULT_TY
             await update.callback_query.edit_message_text(text='Ha habido un error, comprueba que la parcel y polígono son correctos. Inténtalo de nuevo más tarde.')
             context.user_data['poligono'] = None
             context.user_data['parcela'] = None
-            await update.callback_query.edit_message_text(text='Escribe el número de la parcela o envía tu ubicación para saber en qué parcela estás', reply_markup=remove_keyboard)
+            await update.callback_query.edit_message_text(text='Escribe el número de la parcela o envía tu ubicación para saber en qué parcela estás', reply_markup=search_keyboard)
             return
         await update.callback_query.edit_message_text(text='Por favor, espera unos segundos para recibir imágenes de la parcela')
         ref_catastral = get_ref_catastral(sigpac_info)
@@ -65,7 +68,7 @@ async def InlineKeyboardHandler(update: Update, context: ContextTypes.DEFAULT_TY
     elif option == KEYBOARD_OPTIONS['new_search']:
         context.user_data['poligono'] = None
         context.user_data['parcela'] = None
-        await update.callback_query.message.reply_text(text='Escribe el número de la parcela o envía tu ubicación para saber en qué parcela estás', reply_markup=remove_keyboard)
+        await update.callback_query.message.reply_text(text='Escribe el número de la parcela o envía tu ubicación para saber en qué parcela estás', reply_markup=search_keyboard)
 
 async def location_handle(update, context):
     pol_empty = True if not context.user_data.get('poligono') else False
