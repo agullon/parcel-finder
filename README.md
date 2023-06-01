@@ -4,7 +4,6 @@ This is a Telegram bot with a few actions to get info and navigate to a parcel i
 ## Requisites
 - Python3.9
 
-
 ## How to run it
 1. Create a python virtual env: `python3 -m venv env`
 1. Activate virtual environment: `source env/bin/activate`
