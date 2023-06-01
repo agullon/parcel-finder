@@ -2,12 +2,12 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import WebDriverException
+from PIL import Image
+from pyvirtualdisplay import Display
 
 import time, string, random, os
 
-from PIL import Image
-
-temp_dir = r'temp' 
+temp_dir = r'tmp'
 if not os.path.exists(temp_dir):
     os.makedirs(temp_dir)
 filebase = ''.join(random.choices(string.ascii_lowercase, k=10))
@@ -30,7 +30,7 @@ def wheel_element(element, deltaY = 120, offsetX = 0, offsetY = 0):
           target.dispatchEvent(new WheelEvent('wheel',     {view: window, bubbles: true, cancelable: true, clientX: clientX, clientY: clientY, deltaY: deltaY}));
           return;
         }
-      }    
+      }
       return "Element is not interactable";
       """, element, deltaY, offsetX, offsetY)
     if error:
@@ -46,14 +46,9 @@ def delete_images(path_1, path_2):
     os.remove(path_2)
 
 def take_screenshoot(ref_catastral):
-    # Set up Firefox options
-    options = webdriver.FirefoxOptions()
-    options.add_argument("--headless")
-    options.add_argument("-width=1080")
-    options.add_argument("-height=1920")
-
-    # Create a new instance of Firefox driver
-    driver = webdriver.Remote("http://127.0.0.1:4444/wd/hub", options=options)
+    display = Display(visible=0, size=(540, 960))
+    display.start()
+    driver = webdriver.Chrome('/usr/lib/chromium-browser/chromedriver')
 
     # Website URL to navigate
     url = 'https://idecyl.jcyl.es/vcig/?service=https://idecyl.jcyl.es/geoserver/lc/wms'
@@ -111,7 +106,7 @@ def take_screenshoot(ref_catastral):
     elm = driver.find_element(By.XPATH, '//*[@id="ol-main-map"]/div/canvas')
     time.sleep(0.2)
     wheel_element(elm, -100)
-    time.sleep(1)
+    time.sleep(0.2)
 
     # first screenshot
     driver.save_screenshot(path_small_png)
