@@ -8,7 +8,12 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, ContextTypes, filters
 
 locale.setlocale(locale.LC_ALL, 'es_ES')
-log.basicConfig(stream=sys.stdout, level=log.INFO)
+log.basicConfig(
+    stream=sys.stdout,
+    format='%(asctime)s %(levelname)-8s %(message)s',
+    level=log.INFO,
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
 
 # Telegram bot token
 TOKEN = open('/etc/telegram-bot-token/telegram-bot-token', 'r').read().strip()
