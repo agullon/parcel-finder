@@ -157,14 +157,14 @@ async def any_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_text(f'Ya has selecionado la parcela {parcela} y el polígono {poligono}')
 
 def get_catastro_jcyl(poligono, parcela):
-    url = f'https://idecyl.jcyl.es/vcig/proxy.php?url=https%3A%2F%2Fovc.catastro.meh.es%2Fovcservweb%2FOVCSWLocalizacionRC%2FOVCCoordenadas.asmx%2FConsulta_CPMRC%3FSRS%3DEPSG%3A4326%26Provincia%3D%26Municipio%3D%26RC%3D49135A0{poligono}{parcela.zfill(5)}'
-    log.debug(f'jcyl requested url: {url}')
+    url = f'https://idecyl.jcyl.es/vcig/proxy.php?url=https%3A%2F%2Fovc.catastro.meh.es%2Fovcservweb%2FOVCSWLocalizacionRC%2FOVCCoordenadas.asmx%2FConsulta_CPMRC%3FSRS%3DEPSG%3A4326%26Provincia%3D%26Municipio%3D%26RC%3D49135A0{poligono.zfill(2)}{parcela.zfill(5)}'
+    log.info(f'jcyl requested url: {url}')
     response = requests.get(url)
     return ET.fromstring(response.content)
 
 def get_catastro_sigpac(poligono, parcela):
     url = f'https://sigpac.mapama.gob.es/fega/serviciosvisorsigpac/layerinfo?layer=parcela&id=49,135,0,0,{poligono},{parcela}'
-    log.debug(f'sigpac requested url: {url}')
+    log.info(f'sigpac requested url: {url}')
     response = requests.get(url)
     log.info(f'sigpac info:\n {response.content}')
     if response.status_code > 399:
@@ -188,8 +188,13 @@ def get_paraje(catastro_info):
     return catastro_info.find('.//ns:ldt', namespace).text
 
 def get_detailed_info(sigpac_info):
-    area =  float(sigpac_info['query'][0]['dn_surface'])
-    slope = float(sigpac_info['query'][0]['pendiente_media'])
+    area =  float(sigpac_info['parcelaInfo']['dn_surface'])
+
+    avg_slope = 0
+    for recinto in sigpac_info['query']:
+        avg_slope += recinto['pendiente_media']
+    slope = float(avg_slope / len(sigpac_info['query']))
+    
     return area, slope
 
 def get_ref_catastral(sigpac_info):
