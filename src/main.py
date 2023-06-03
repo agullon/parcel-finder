@@ -44,9 +44,9 @@ async def InlineKeyboardHandler(update: Update, context: ContextTypes.DEFAULT_TY
 
     option = update.callback_query.data
     if option == KEYBOARD_OPTIONS['navigate']:
-        sigpac_info = get_catastro_sigpac(poligono, parcela)
-        if not sigpac_info:
-            await update.callback_query.edit_message_text(text='Ha habido un error, comprueba que la parcel y polígono son correctos. Inténtalo de nuevo más tarde.')
+        sigpac_info, sigpac_error = get_catastro_sigpac(poligono, parcela)
+        if sigpac_error:
+            await update.callback_query.edit_message_text(text=f'Ha habido un error: {sigpac_error}')
             context.user_data['poligono'] = None
             context.user_data['parcela'] = None
             await update.callback_query.message.reply_text(text='Escribe el número de la parcela o envía tu ubicación para saber en qué parcela estás', reply_markup=search_keyboard)
@@ -55,9 +55,9 @@ async def InlineKeyboardHandler(update: Update, context: ContextTypes.DEFAULT_TY
         await update.callback_query.message.reply_text(text='Envíame una ubicación para obtener indicaciones sobre cómo ir desde cualquier sitio')
         await update.callback_query.message.reply_text(text='¿Qué más quieres saber?', reply_markup=options_keyboard)
     elif option == KEYBOARD_OPTIONS['photo']:
-        sigpac_info = get_catastro_sigpac(poligono, parcela)
-        if not sigpac_info:
-            await update.callback_query.edit_message_text(text='Ha habido un error, comprueba que la parcel y polígono son correctos. Inténtalo de nuevo más tarde.')
+        sigpac_info, sigpac_error = get_catastro_sigpac(poligono, parcela)
+        if sigpac_error:
+            await update.callback_query.edit_message_text(text=f'Ha habido un error: {sigpac_error}')
             context.user_data['poligono'] = None
             context.user_data['parcela'] = None
             await update.callback_query.edit_message_text(text='Escribe el número de la parcela o envía tu ubicación para saber en qué parcela estás', reply_markup=search_keyboard)
@@ -99,14 +99,21 @@ async def find_parcel_from_coordinates(update, context):
     log.info(f'Catastro API response: {response}')
 
     namespace = {'ns': 'http://www.catastro.meh.es/'}
-    paraje = response.find('.//ns:ldt', namespace).text.split(' ')
-    print(paraje)
+    res = response.find('.//ns:ldt', namespace).text.split(' ')
 
-    poligono = paraje[1]
-    parcela = paraje[3]
+    poligono = res[1]
+    parcela = res[3]
     context.user_data['poligono'] = poligono
     context.user_data['parcela'] = parcela
-    await update.message.reply_text(f'Estás en la parcela {parcela} y el polígono {poligono}, {get_info(poligono, parcela)}')
+
+    paraje, area, slope, error = get_info(poligono, parcela) 
+    if error:
+        text = f'Ha habido un error: {error}'
+        context.user_data['poligono'] = None
+        context.user_data['parcela'] = None
+    else:
+        text = f'Estás en la parcela {parcela} y el polígono {poligono}, el paraje es \'{paraje}\', tiene {area:.0f}m² de superficie y un {slope:.0f}% de pendiente'
+    await update.message.reply_text(f'{text}')
     await update.message.reply_text('¿Qué quieres saber?', reply_markup=options_keyboard)
 
 async def get_user_coordinates(update, context):
@@ -122,7 +129,13 @@ async def calculate_distance(update, context, coordinates=None):
     # get destination coordinates
     poligono = context.user_data.get('poligono')
     parcela = context.user_data.get('parcela')
-    jcyl_info = get_catastro_jcyl(poligono, parcela)
+
+    jcyl_info, jcyl_error = get_catastro_jcyl(poligono, parcela)
+    if jcyl_error:
+        log.error(jcyl_error)
+        context.user_data['poligono'] = None
+        context.user_data['parcela'] = None
+        return f'Ha habido un error: {jcyl_error}'
     destination_coordinates = get_parcela_coordinates(jcyl_info)
     log.debug(f'Destination coordinates: {destination_coordinates[0]}, {destination_coordinates[1]}')
     
@@ -149,8 +162,15 @@ async def any_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         poligono = context.user_data.get('poligono')
         parcela = context.user_data.get('parcela')
         await update.message.reply_text(f'Has selecionado la parcela {parcela} y el polígono {poligono}')
-        await update.message.reply_text(f'Está en {get_info(poligono, parcela)}')
-        await update.message.reply_text('¿Qué quieres saber?', reply_markup=options_keyboard)
+        paraje, area, slope, error = get_info(poligono, parcela) 
+        if error:
+            text = f'Ha habido un error: {error}'
+            context.user_data['poligono'] = None
+            context.user_data['parcela'] = None
+        else:
+            text = f'El paraje es \'{paraje}\' y la parcela tiene {area:.0f}m² de superficie y un {slope:.0f}% de pendiente'
+        await update.message.reply_text(f'{text}')
+        await update.message.reply_text('¿Qué más quieres saber?', reply_markup=options_keyboard)
     else:
         poligono = context.user_data.get('poligono')
         parcela = context.user_data.get('parcela')
@@ -158,24 +178,38 @@ async def any_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 def get_catastro_jcyl(poligono, parcela):
     url = f'https://idecyl.jcyl.es/vcig/proxy.php?url=https%3A%2F%2Fovc.catastro.meh.es%2Fovcservweb%2FOVCSWLocalizacionRC%2FOVCCoordenadas.asmx%2FConsulta_CPMRC%3FSRS%3DEPSG%3A4326%26Provincia%3D%26Municipio%3D%26RC%3D49135A0{poligono.zfill(2)}{parcela.zfill(5)}'
-    log.info(f'jcyl requested url: {url}')
-    response = requests.get(url)
-    return ET.fromstring(response.content)
+    log.info(f'idecyl.jcyl.es requested url:\n{url}')
+    try:
+        response = requests.get(url)
+    except requests.exceptions.RequestException as e: 
+        log.error(f'Server returned error:\n {e}')
+        return None, 'No se ha podido consultar la parcela y polígono en el Catastro'
+    
+    log.info(f'idecyl.jcyl.es info:\n {response.content}')
+    if response.status_code > 399:
+        log.error(f'Server returned {response.status_code} HTTP code')
+        return None, 'No se ha podido consultar la parcela y polígono en el Catastro'
+    return ET.fromstring(response.content), None
 
 def get_catastro_sigpac(poligono, parcela):
     url = f'https://sigpac.mapama.gob.es/fega/serviciosvisorsigpac/layerinfo?layer=parcela&id=49,135,0,0,{poligono},{parcela}'
-    log.info(f'sigpac requested url: {url}')
-    response = requests.get(url)
-    log.info(f'sigpac info:\n {response.content}')
+    log.info(f'sigpac.mapama.gob.es requested url:\n{url}')
+    try:
+        response = requests.get(url)
+    except requests.exceptions.RequestException as e: 
+        log.error(f'Server returned error:\n {e}')
+        return None, 'No se ha podido consultar la parcela y polígono en el Catastro'
+    
+    log.info(f'sigpac.mapama.gob.es info:\n{response.content}')
     if response.status_code > 399:
-        log.info(f'Server returned {response.status_code} HTTP code')
-        return None
+        log.error(f'Server returned {response.status_code} HTTP code')
+        return None, 'No se ha podido consultar la parcela y polígono en el Catastro'
     res_json = json.loads(response.content)
 
     if res_json['query'] == []:
-        log.info('Parcel does not exist')
-        return None
-    return res_json
+        log.error(f'Parcel does not exist: poligono={poligono} parcela={parcela}')
+        return None, f'No se han encontrado la parcela y el polígono en el Catastro'
+    return res_json, None
 
 def get_parcela_coordinates(catastro_info):
     namespace = {'ns': 'http://www.catastro.meh.es/'}
@@ -220,22 +254,23 @@ def get_direction(org, dest):
 
 def print_direction(degrees):
     log.debug(f'Direction degrees: {degrees}')
-    compass = ['este', 'noreste', 'norte', 'noroeste', 'oeste', 'suroeste', 'este', 'sureste', 'este']
+    compass = ['este', 'noreste', 'norte', 'noroeste', 'oeste', 'suroeste', 'sur', 'sureste']
     return compass[round(degrees/45)]
 
-def get_info(poligono, parcela): 
-    if not poligono or not parcela:
-        log.error('parcela or poligono vars are not set')
-        return 'Introduce el número del polígono y la parcela'
-
-    jcyl_info = get_catastro_jcyl(poligono, parcela)
-    sigpac_info = get_catastro_sigpac(poligono, parcela)
+def get_info(poligono, parcela):
+    jcyl_info, jcyl_error = get_catastro_jcyl(poligono, parcela)
+    if jcyl_error:
+        return None, None, None, jcyl_error
+    
+    sigpac_info, sigpac_error = get_catastro_sigpac(poligono, parcela)
+    if sigpac_error:
+        return None, None, None, sigpac_error
 
     paraje = get_paraje(jcyl_info).split(f'{parcela} ')[1].split('.')[0].title()
     area, slope = get_detailed_info(sigpac_info)
     slope = slope/10
 
-    return f'en el paraje \'{paraje}\', tiene {area:.0f}m² de superficie y un {slope:.0f}% de pendiente'
+    return paraje, area, slope, None
 
 def take_screenshot(ref_catastral):
     path_small_image, path_large_image = screenshot.take_screenshoot(ref_catastral)
