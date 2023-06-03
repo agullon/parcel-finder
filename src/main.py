@@ -95,16 +95,12 @@ async def find_parcel_from_coordinates(update, context):
     log.info(f'UTM coordinates: x={x_coor} y={y_coor}')
     url = f'http://ovc.catastro.meh.es/ovcservweb/OVCSWLocalizacionRC/OVCCoordenadas.asmx/Consulta_RCCOOR?Coordenada_X={x_coor}&Coordenada_Y={y_coor}&SRS=EPSG%3A32629'
     log.info(f'Catastro API requested url: {url}')
-    response = ET.fromstring(requests.get(url).content)
+    response = requests.get(url).content
     log.info(f'Catastro API response: {response}')
-
-    namespace = {'ns': 'http://www.catastro.meh.es/'}
-    res = response.find('.//ns:ldt', namespace).text.split(' ')
-
-    poligono = res[1]
-    parcela = res[3]
-    context.user_data['poligono'] = poligono
-    context.user_data['parcela'] = parcela
+    response_parsed = ET.fromstring(response).find('.//ns:ldt', {'ns': 'http://www.catastro.meh.es/'}).text.split(' ')
+    
+    poligono = context.user_data['poligono'] = response_parsed[1]
+    parcela = context.user_data['parcela'] = response_parsed[3]
 
     paraje, area, slope, error = get_info(poligono, parcela) 
     if error:
@@ -137,7 +133,7 @@ async def calculate_distance(update, context, coordinates=None):
         context.user_data['parcela'] = None
         return f'Ha habido un error: {jcyl_error}'
     destination_coordinates = get_parcela_coordinates(jcyl_info)
-    log.debug(f'Destination coordinates: {destination_coordinates[0]}, {destination_coordinates[1]}')
+    log.info(f'Destination coordinates: {destination_coordinates[0]}, {destination_coordinates[1]}')
     
     # get distance
     distance = geo_distance(origen_coordinates, destination_coordinates).meters
@@ -253,7 +249,7 @@ def get_direction(org, dest):
         return degrees
 
 def print_direction(degrees):
-    log.debug(f'Direction degrees: {degrees}')
+    log.info(f'Direction degrees: {degrees}')
     compass = ['este', 'noreste', 'norte', 'noroeste', 'oeste', 'suroeste', 'sur', 'sureste']
     return compass[round(degrees/45)]
 
