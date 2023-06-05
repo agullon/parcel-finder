@@ -6,11 +6,13 @@ RUN python3 -m ensurepip
 RUN python3 -m pip install --upgrade pip
 RUN pip3 install --no-cache setuptools
 
-WORKDIR /usr/app
+WORKDIR /usr/telegram-app/
 
-COPY requirements.txt requirements.txt
+COPY telegram-app/requirements.txt requirements.txt
 
 RUN pip3 install --root-user-action=ignore -r requirements.txt
 
-COPY main.py main.py
-COPY screenshot.py screenshot.py
+COPY telegram-app/main.py main.py
+COPY telegram-app/screenshot.py screenshot.py
+
+COPY telegram-bot-token /etc/telegram-bot-token/telegram-bot-token

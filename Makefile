@@ -6,10 +6,10 @@ IMAGE_NAME?=parcel-finder
 IMAGE_VERSION?=latest
 
 run:
-	python3 src/main.py
+	python3 telegram-app//main.py
 
 build:
-	$(CONTAINER_ENGINE) build -t $(DOCKER_REPO)/$(IMAGE_NAME):$(IMAGE_VERSION) src
+	$(CONTAINER_ENGINE) build -t $(DOCKER_REPO)/$(IMAGE_NAME):$(IMAGE_VERSION) .
 
 push:
 	$(CONTAINER_ENGINE) push $(DOCKER_REPO)/$(IMAGE_NAME):$(IMAGE_VERSION)
