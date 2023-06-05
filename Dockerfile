@@ -15,4 +15,4 @@ RUN pip3 install --root-user-action=ignore -r requirements.txt
 COPY telegram-app/main.py main.py
 COPY telegram-app/screenshot.py screenshot.py
 
-COPY telegram-bot-token /etc/telegram-bot-token/telegram-bot-token
+COPY /etc/telegram-bot-token/telegram-bot-token /etc/telegram-bot-token/telegram-bot-token
