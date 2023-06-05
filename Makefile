@@ -6,7 +6,7 @@ IMAGE_NAME?=parcel-finder
 IMAGE_VERSION?=latest
 
 run:
-	python3 telegram-app//main.py
+	python3 telegram-app/main.py
 
 build:
 	$(CONTAINER_ENGINE) build -t $(DOCKER_REPO)/$(IMAGE_NAME):$(IMAGE_VERSION) .
