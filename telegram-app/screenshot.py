@@ -3,7 +3,6 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import WebDriverException
 from PIL import Image
-from pyvirtualdisplay import Display
 
 import time, string, random, os
 
@@ -45,10 +44,12 @@ def delete_images(path_1, path_2):
     os.remove(path_1)
     os.remove(path_2)
 
-def take_screenshoot(ref_catastral):
-    display = Display(visible=0, size=(1080, 1920))
-    display.start()
-    driver = webdriver.Chrome('/usr/lib/chromium-browser/chromedriver')
+
+def take_screenshoot(ref_catastral): 
+    opts = webdriver.ChromeOptions()
+    opts.add_argument('--headless=new')
+    driver = webdriver.Remote(options=opts, command_executor='http://127.0.0.1:4444/wd/hub')
+    driver.set_window_size(1080, 1920)
 
     # Website URL to navigate
     url = 'https://idecyl.jcyl.es/vcig/?service=https://idecyl.jcyl.es/geoserver/lc/wms'
