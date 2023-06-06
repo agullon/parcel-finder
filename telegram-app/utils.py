@@ -127,7 +127,7 @@ def print_distance(distance):
         if distance >= 10:
             return f"{distance:.0f} km"
         elif distance < 10:
-            return f"{distance:.0f} km".replace('.', ',')
+            return f"{distance:.1f} km".replace('.', ',')
     else:
         return f"{distance:.0f} metros"
 
