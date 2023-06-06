@@ -1,13 +1,10 @@
 import handlers
 
 import logging as log
-import sys, locale
+import sys
 from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, filters
 
 def main():
-    # Set localization
-    locale.setlocale(locale.LC_ALL, 'es_ES')
-
     # Init and config logger
     log.basicConfig(
         stream=sys.stdout,

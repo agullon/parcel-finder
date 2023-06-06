@@ -1,7 +1,7 @@
 import screenshot, handlers
 
 import logging as log
-import requests, json, locale, math, utm
+import requests, json, math, utm
 import xml.etree.ElementTree as ET
 from geopy.distance import geodesic as geo_distance
 
@@ -124,7 +124,10 @@ def get_ref_catastral(sigpac_info):
 def print_distance(distance):
     if distance > 1000:
         distance = distance / 1000
-        return f"{locale.format_string('%.1f', distance)} km"
+        if distance >= 10:
+            return f"{distance:.0f} km"
+        elif distance < 10:
+            return f"{distance:.0f} km".replace('.', ',')
     else:
         return f"{distance:.0f} metros"
 
