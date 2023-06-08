@@ -1,4 +1,16 @@
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: selenium
+spec:
+  selector:
+    app: selenium
+  ports:
+    - protocol: TCP
+      port: 4444
+      targetPort: 4444
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -18,20 +30,30 @@ spec:
     spec:
       containers:
       - name: parcel-finder
-        image: agullon/parcel-finder:latest
-        command: ["python"]
-        args: ["main.py"]
+        image: docker.io/agullon/parcel-finder:latest
+        command: ["python3"]
+        args: ["telegram-app/main.py"]
         volumeMounts:
         - name: telegram-bot-token
           readOnly: true
           mountPath: "/etc/telegram-bot-token"
+            # ports:
+            # - containerPort: 4444
+            # - containerPort: 443
+            # - containerPort: 80
+        env:
+        - name: LOCALHOST
+          value: "192.168.1.43"
       - name: selenium
-        image: seleniarm/standalone-docker:4.9.1
+        image: docker.io/seleniarm/standalone-chromium:latest
         env:
         - name: VNC_NO_PASSWORD
           value: "1"
         ports:
         - containerPort: 4444
+        volumeMounts:
+        - mountPath: /dev/shm
+          name: dshm
       imagePullSecrets:
       - name: regcred
       volumes:
@@ -39,3 +61,7 @@ spec:
         secret:
           secretName: telegram-bot-token
           optional: true
+      - name: dshm
+        emptyDir:     
+          medium: Memory
+

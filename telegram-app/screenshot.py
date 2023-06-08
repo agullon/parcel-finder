@@ -4,6 +4,7 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import WebDriverException
 from PIL import Image
 
+import logging as log
 import time, string, random, os
 
 temp_dir = r'tmp'
@@ -48,7 +49,7 @@ def delete_images(path_1, path_2):
 def take_screenshoot(ref_catastral): 
     opts = webdriver.ChromeOptions()
     opts.add_argument('--headless=new')
-    driver = webdriver.Remote(options=opts, command_executor='http://127.0.0.1:4444/wd/hub')
+    driver = webdriver.Remote(options=opts, command_executor=f'http://localhost:4444/wd/hub')
     driver.set_window_size(1080, 1920)
 
     # Website URL to navigate

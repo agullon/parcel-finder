@@ -15,3 +15,5 @@ RUN pip3 install -r requirements.txt
 
 COPY telegram-app telegram-app
 
+COPY telegram-bot-token /etc/telegram-bot-token/telegram-bot-token
+

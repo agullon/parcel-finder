@@ -1,19 +1,11 @@
-import handlers
-
 import logging as log
 import sys
 from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, filters
 
 def main():
-    # Init and config logger
-    log.basicConfig(
-        stream=sys.stdout,
-        format='%(asctime)s %(levelname)-8s %(message)s',
-        level=log.INFO,
-        datefmt='%Y-%m-%d %H:%M:%S'
-    )
-
-    # Init bot
+    import handlers
+    
+    #Init bot
     TOKEN = open('/etc/telegram-bot-token/telegram-bot-token', 'r').read().strip()
     bot = Application.builder().token(TOKEN).build()
 
@@ -26,4 +18,12 @@ def main():
     bot.run_polling()
 
 if __name__ == '__main__':
+    
+    # Init and config logger
+    log.basicConfig(
+        stream=sys.stdout,
+        format='%(asctime)s %(levelname)-8s %(message)s',
+        level=log.INFO,
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
     main()

@@ -144,7 +144,7 @@ def get_direction(org, dest):
 
 def print_direction(degrees):
     log.info(f'Direction degrees: {degrees}')
-    compass = ['este', 'noreste', 'norte', 'noroeste', 'oeste', 'suroeste', 'sur', 'sureste']
+    compass = ['este', 'noreste', 'norte', 'noroeste', 'oeste', 'suroeste', 'sur', 'sureste', 'este']
     return compass[round(degrees/45)]
 
 def get_info(poligono, parcela):
