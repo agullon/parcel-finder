@@ -32,8 +32,11 @@ redeploy: remove deploy
 rollout:
 	kubectl rollout restart deployment -l name=parcel-finder -n prod
 
-logs:
-	kubectl logs -f -l name=parcel-finder -n prodi
+logs-bot:
+	kubectl logs -f -l name=parcel-finder -n prod -c parcel-finder
+
+logs-bot:
+	kubectl logs -f -l name=parcel-finder -n prod -c selenium	
 
 describe:
 	kubectl describe pod -l name=parcel-finder -n prod
