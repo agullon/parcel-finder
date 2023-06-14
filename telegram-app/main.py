@@ -1,12 +1,12 @@
 import logging as log
-import sys
+import sys, os
 from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, filters
 
 def main():
     import handlers
     
     #Init bot
-    TOKEN = open('/etc/telegram-bot-token/telegram-bot-token', 'r').read().strip()
+    TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
     bot = Application.builder().token(TOKEN).build()
 
     # Init input handlers

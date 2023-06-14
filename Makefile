@@ -5,43 +5,15 @@ DOCKER_REPO?=agullon
 IMAGE_NAME?=parcel-finder
 IMAGE_VERSION?=latest
 
-run:
-	$(CONTAINER_ENGINE) run --rm -p 4444 -e LOCALHOST='$(LOCALHOST)' $(DOCKER_REPO)/$(IMAGE_NAME):latest
+run-bot:
+	$(CONTAINER_ENGINE) run --rm -p 4444 -e TELEGRAM_BOT_TOKEN=$(shell cat bot-token) $(DOCKER_REPO)/$(IMAGE_NAME):latest python3 telegram-app/main.py
 
-run-local:
-	$(CONTAINER_ENGINE) run --rm -p 4444 -e LOCALHOST='$(LOCALHOST)' $(DOCKER_REPO)/$(IMAGE_NAME):local
+run-seleniumhub:
+	$(CONTAINER_ENGINE) run --rm -it -p 4444:4444 -p 5900:5900 -p 7900:7900 --shm-size 2g seleniarm/standalone-chromium:latest
 
 build:
 	$(CONTAINER_ENGINE) build -t $(DOCKER_REPO)/$(IMAGE_NAME):latest -f Dockerfile .
 
-build-local:
-	$(CONTAINER_ENGINE) build -t $(DOCKER_REPO)/$(IMAGE_NAME):local -f Dockerfile.local .
-
 push:
 	$(CONTAINER_ENGINE) push $(DOCKER_REPO)/$(IMAGE_NAME):latest
 
-k8s/create-secret:
-	kubectl create secret generic regcred --from-file=.dockerconfigjson=/home/agullon/.docker/config.json --type=kubernetes.io/dockerconfigjson -n prod
-
-deploy:
-	kubectl create secret generic telegram-bot-token --from-file=/home/agullon/parcel-finder/telegram-bot-token -n prod
-	kubectl apply -f k8s-manifests/telegram-bot.yaml -n prod
-
-redeploy: remove deploy
-
-rollout:
-	kubectl rollout restart deployment -l name=parcel-finder -n prod
-
-logs-bot:
-	kubectl logs -f -l name=parcel-finder -n prod -c parcel-finder
-
-logs-bot:
-	kubectl logs -f -l name=parcel-finder -n prod -c selenium	
-
-describe:
-	kubectl describe pod -l name=parcel-finder -n prod
-
-remove:
-	kubectl delete -f k8s-manifests/telegram-bot.yaml -n prod
-	kubectl delete secret telegram-bot-token -n prod
-	
