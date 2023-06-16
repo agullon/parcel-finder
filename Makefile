@@ -17,10 +17,7 @@ run-selenium-hub:
 
 stop-selenium-hub:
 	$(CONTAINER_ENGINE) stop selenium-hub
-<<<<<<< HEAD
 	$(CONTAINER_ENGINE) rm selenium-hub
-=======
->>>>>>> e123732d9924229d9ce9316a3e857bc968d8e626
 
 build:
 	$(CONTAINER_ENGINE) build -t $(DOCKER_REPO)/$(IMAGE_NAME):latest -f Dockerfile .
