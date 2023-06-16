@@ -10,9 +10,10 @@ git fetch
 REMOTE_COMMIT_ID=$(git log origin/$BRANCH -1 --format="%H")
 LOCAL_COMMIT_ID=$(git log $BRANCH -1 --format="%H")
 
-NUM_PID_RUNNING=$(pgrep -fxc 'python3 src/main.py')
+PARCEL_FINDER_RUNNING=$(podman container ls | grep -c parcel-finder)
+SELENIUM_HUB_RUNNING=$(podman container ls | grep -c selenium-hub)
 
-if (( $NUM_PID_RUNNING != 1 )) || [ "$REMOTE_COMMIT_ID" != "$LOCAL_COMMIT_ID" ]; then
+if (( $PARCEL_FINDER_RUNNING != 1 )) || (( $SELENIUM_HUB_RUNNING != 1 )) || [ "$REMOTE_COMMIT_ID" != "$LOCAL_COMMIT_ID" ]; then
 	bash /home/agullon/parcel-finder/devops/redeploy.sh $DIR $BRANCH
 fi
 

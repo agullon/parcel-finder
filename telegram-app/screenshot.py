@@ -49,7 +49,8 @@ def delete_images(path_1, path_2):
 def take_screenshoot(ref_catastral): 
     opts = webdriver.ChromeOptions()
     opts.add_argument('--headless=new')
-    driver = webdriver.Remote(options=opts, command_executor=f'http://localhost:4444/wd/hub')
+    SELENIUM_HUB_IP = os.getenv('SELENIUM_HUB_IP')
+    driver = webdriver.Remote(options=opts, command_executor=f'http://{SELENIUM_HUB_IP}:4444/wd/hub')
     driver.set_window_size(1080, 1920)
 
     # Website URL to navigate
