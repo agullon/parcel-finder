@@ -11,6 +11,7 @@ def main():
 
     # Init input handlers
     bot.add_handler(CommandHandler("start", handlers.start))
+    bot.add_handler(CommandHandler("empezar", handlers.start))
     bot.add_handler(CallbackQueryHandler(handlers.InlineKeyboardHandler))
     bot.add_handler(MessageHandler(filters.TEXT, handlers.text_input_handler))
     bot.add_handler(MessageHandler(filters.LOCATION, handlers.location_input_handler))

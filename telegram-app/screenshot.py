@@ -45,7 +45,6 @@ def delete_images(path_1, path_2):
     os.remove(path_1)
     os.remove(path_2)
 
-
 def take_screenshoot(ref_catastral): 
     opts = webdriver.ChromeOptions()
     opts.add_argument('--headless=new')
@@ -58,6 +57,7 @@ def take_screenshoot(ref_catastral):
 
     # Navigate to the website
     driver.get(url)
+    log.info('Browser opened')
     time.sleep(1)
 
     # close popup

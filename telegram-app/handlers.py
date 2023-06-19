@@ -25,8 +25,8 @@ search_keyboard = InlineKeyboardMarkup(
 )
 remove_keyboard = InlineKeyboardMarkup([])
 
-async def start(update, context):
-    await update.message.reply_text(text='Escribe el número de la parcela o envía tu ubicación para saber en qué parcela estás')
+async def start(update: Update, context):
+    await update.message.reply_text(text=f'Hola {update.effective_user.first_name}, escribe el número de la parcela o envía tu ubicación para saber en qué parcela estás')
 
 async def InlineKeyboardHandler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     poligono = context.user_data.get('poligono')
