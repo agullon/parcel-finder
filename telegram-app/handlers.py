@@ -26,7 +26,7 @@ search_keyboard = InlineKeyboardMarkup(
 remove_keyboard = InlineKeyboardMarkup([])
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await utils.monitor_user_actions(f'{update.effective_user.username} joined for first time')
+    await utils.monitor_user_actions(f'{update.effective_user.username} joined for the first time')
     await update.message.reply_text(text=f'Hola {update.effective_user.first_name}, escribe el número de la parcela o envía tu ubicación para saber en qué parcela estás')
 
 async def InlineKeyboardHandler(update: Update, context: ContextTypes.DEFAULT_TYPE):
