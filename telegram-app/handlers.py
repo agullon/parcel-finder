@@ -126,4 +126,3 @@ async def location_input_handler(update, context):
         await update.message.reply_text(await utils.calculate_distance(update, context))
     else:
         await update.callback_query.message.reply_text(text='¿Qué quieres saber?', reply_markup=options_keyboard)
-
