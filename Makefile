@@ -6,7 +6,7 @@ IMAGE_NAME?=parcel-finder
 IMAGE_VERSION?=latest
 
 run-parcel-finder:
-	$(CONTAINER_ENGINE) run -d --rm --name parcel-finder -e TELEGRAM_BOT_TOKEN=$(shell cat telegram-bot-token) -e SELENIUM_HUB_IP=192.168.1.40 $(DOCKER_REPO)/$(IMAGE_NAME):latest python3 telegram-app/main.py
+	$(CONTAINER_ENGINE) run -d --rm --name parcel-finder -e TELEGRAM_BOT_TOKEN_PROD=$(shell cat telegram-bot-token-prod) -e TELEGRAM_BOT_TOKEN_DEV=$(shell cat telegram-bot-token-dev) -e SELENIUM_HUB_IP=192.168.1.40 $(DOCKER_REPO)/$(IMAGE_NAME):latest python3 telegram-app/main.py
 
 stop-parcel-finder:
 	$(CONTAINER_ENGINE) stop parcel-finder
