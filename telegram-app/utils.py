@@ -165,3 +165,10 @@ def get_info(poligono, parcela):
 def take_screenshot(ref_catastral):
     path_small_image, path_large_image = screenshot.take_screenshoot(ref_catastral)
     return path_small_image, path_large_image
+
+async def monitor_user_actions(message_text):
+    import os
+    import telegram
+    TOKEN = os.getenv("TELEGRAM_BOT_TOKEN_DEV")
+    bot = telegram.Bot(token=TOKEN)
+    await bot.send_message(chat_id='5374343', text=message_text)

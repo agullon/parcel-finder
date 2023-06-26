@@ -6,7 +6,7 @@ def main():
     import handlers
     
     #Init bot
-    TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+    TOKEN = os.getenv("TELEGRAM_BOT_TOKEN_PROD")
     bot = Application.builder().token(TOKEN).build()
 
     # Init input handlers

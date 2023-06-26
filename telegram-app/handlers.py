@@ -26,7 +26,7 @@ search_keyboard = InlineKeyboardMarkup(
 remove_keyboard = InlineKeyboardMarkup([])
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await context.bot.send_message(chat_id='5374343', text=f'{update.effective_user.username} joined for first time')
+    await utils.monitor_user_actions(f'{update.effective_user.username} joined for first time')
     await update.message.reply_text(text=f'Hola {update.effective_user.first_name}, escribe el número de la parcela o envía tu ubicación para saber en qué parcela estás')
 
 async def InlineKeyboardHandler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -35,7 +35,7 @@ async def InlineKeyboardHandler(update: Update, context: ContextTypes.DEFAULT_TY
 
     option = update.callback_query.data
     if option == KEYBOARD_OPTIONS['navigate']:
-        await context.bot.send_message(chat_id='5374343', text=f'{update.effective_user.username} requested instructions to go to a parcel')
+        await utils.monitor_user_actions(f'{update.effective_user.username} requested instructions to go to a parcel')
         sigpac_info, sigpac_error = utils.get_catastro_sigpac(poligono, parcela)
         if sigpac_error:
             await update.callback_query.edit_message_text(text=f'Ha habido un error: {sigpac_error}')
@@ -47,7 +47,7 @@ async def InlineKeyboardHandler(update: Update, context: ContextTypes.DEFAULT_TY
         await update.callback_query.message.reply_text(text='Envíame una ubicación para obtener indicaciones sobre cómo ir desde cualquier sitio')
         await update.callback_query.message.reply_text(text='¿Qué más quieres saber?', reply_markup=options_keyboard)
     elif option == KEYBOARD_OPTIONS['photo']:
-        await context.bot.send_message(chat_id='5374343', text=f'{update.effective_user.username} requested a photo')
+        await utils.monitor_user_actions(f'{update.effective_user.username} requested a photo')
         sigpac_info, sigpac_error = utils.get_catastro_sigpac(poligono, parcela)
         if sigpac_error:
             await update.callback_query.edit_message_text(text=f'Ha habido un error: {sigpac_error}')
@@ -63,7 +63,7 @@ async def InlineKeyboardHandler(update: Update, context: ContextTypes.DEFAULT_TY
         screenshot.delete_images(path_small_image, path_large_image)
         await update.callback_query.message.reply_text(text='¿Qué más quieres saber?', reply_markup=options_keyboard)
     elif option == KEYBOARD_OPTIONS['new_search']:
-        await context.bot.send_message(chat_id='5374343', text=f'{update.effective_user.username} started a new search')
+        await utils.monitor_user_actions(f'{update.effective_user.username} started a new search')
         context.user_data['poligono'] = None
         context.user_data['parcela'] = None
         await update.callback_query.message.reply_text(text='Escribe el número de la parcela o envía tu ubicación para saber en qué parcela estás', reply_markup=search_keyboard)
@@ -81,12 +81,12 @@ async def text_input_handler(update: Update, context: ContextTypes.DEFAULT_TYPE)
     par_empty = True if not context.user_data.get('parcela') else False
 
     if par_empty:
-        await context.bot.send_message(chat_id='5374343', text=f'{update.effective_user.username} introduced parcela number')
+        await utils.monitor_user_actions(f'{update.effective_user.username} introduced parcela number')
         context.user_data['parcela'] = input
         await update.message.reply_text('Escribe el número del polígono')
         return
     elif pol_empty:
-        await context.bot.send_message(chat_id='5374343', text=f'{update.effective_user.username} introduced polígono number')
+        await utils.monitor_user_actions(f'{update.effective_user.username} introduced polígono number')
         context.user_data['poligono'] = input
         poligono = context.user_data.get('poligono')
         parcela = context.user_data.get('parcela')
@@ -100,7 +100,7 @@ async def text_input_handler(update: Update, context: ContextTypes.DEFAULT_TYPE)
             await update.message.reply_text('Escribe el número de la parcela o envía tu ubicación para saber en qué parcela estás')
             return
         else:
-            await context.bot.send_message(chat_id='5374343', text=f'{update.effective_user.username} received parcela info')
+            await utils.monitor_user_actions(f'{update.effective_user.username} received parcela info')
             text = f'El paraje es \'{paraje}\' y la parcela tiene {area:.0f}m² de superficie y un {slope:.0f}% de pendiente'
             await update.message.reply_text(f'{text}')
             await update.message.reply_text('¿Qué más quieres saber?', reply_markup=options_keyboard)
@@ -113,7 +113,7 @@ async def text_input_handler(update: Update, context: ContextTypes.DEFAULT_TYPE)
         return
     
 async def location_input_handler(update, context):
-    await context.bot.send_message(chat_id='5374343', text=f'{update.effective_user.username} sent location')
+    await utils.monitor_user_actions(f'{update.effective_user.username} sent location')
     pol_empty = True if not context.user_data.get('poligono') else False
     par_empty = True if not context.user_data.get('parcela') else False
 
