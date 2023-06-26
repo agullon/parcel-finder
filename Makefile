@@ -21,4 +21,3 @@ stop-selenium-hub:
 
 build:
 	$(CONTAINER_ENGINE) build -t $(DOCKER_REPO)/$(IMAGE_NAME):latest -f Dockerfile .
-
