@@ -19,5 +19,5 @@ stop-selenium-hub:
 	-$(CONTAINER_ENGINE) stop selenium-hub
 	-$(CONTAINER_ENGINE) rm selenium-hub
 
-build:
+build-parcel-finder:
 	$(CONTAINER_ENGINE) build -t $(DOCKER_REPO)/$(IMAGE_NAME):latest -f Dockerfile .
