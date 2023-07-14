@@ -12,7 +12,7 @@ stop-parcel-finder:
 	-$(CONTAINER_ENGINE) stop parcel-finder
 
 run-selenium-hub:
-	$(CONTAINER_ENGINE) run -d --rm --name selenium-hub -it -p 4444:4444 -p 5900:5900 -p 7900:7900 --shm-size 2g seleniarm/standalone-chromium:latest
+	$(CONTAINER_ENGINE) run -d --rm --name selenium-hub -it -p 4444:4444 -p 7900:7900 --shm-size 2g docker.io/seleniarm/standalone-chromium:latest
 
 stop-selenium-hub:
 	-$(CONTAINER_ENGINE) stop selenium-hub
